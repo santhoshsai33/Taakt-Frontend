@@ -133,7 +133,15 @@ const Tracking = () => {
 
             const response = await updateShipment(update.shipmentId, payload);
             toast.success(response.data?.message || 'Shipment updated successfully.');
-            await fetchShipmentDetails(update.shipmentId);
+
+            if (update.status === 'DELIVERED') {
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                setUpdate(prev => ({ ...prev, remarks: '' }));
+                await fetchShipmentDetails(update.shipmentId);
+            }
         } catch (error) {
             const message = error.response?.data?.message || 'Unable to update shipment.';
             toast.error(message);
