@@ -77,7 +77,7 @@ const Login = () => {
                             <div className="position-relative">
                                 <Form.Control
                                     type="email"
-                                    placeholder="Enter your email account"
+                                    placeholder="Enter your email"
                                     className="login-input px-3 py-2 bg-light border-0 rounded-2 shadow-none"
                                     style={{ height: '48px', fontSize: '0.9rem' }}
                                     aria-invalid={errors.email ? 'true' : 'false'}
