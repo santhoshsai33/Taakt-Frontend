@@ -153,13 +153,11 @@ const AddShipment = () => {
     return (
         <div>
             <Form onSubmit={handleSubmit(handleCreateShipment, onInvalid)} noValidate>
-                <div className="d-flex justify-content-between align-items-center mb-4">
-                    <div className="d-flex align-items-center gap-3">
-                        <Button variant="light" className="rounded-circle shadow-sm d-flex align-items-center justify-content-center border-0 p-0" style={{ width: '40px', height: '40px' }} onClick={() => navigate('/shipments')}>
-                            <FiArrowLeft className="fs-5 text-dark" />
-                        </Button>
-                        <PageTitle title={isEditMode ? "Edit Shipment" : "Add New Shipment"} />
-                    </div>
+                <div className="d-flex align-items-center mb-4">
+                    <Button variant="light" className="rounded-circle shadow-sm d-flex align-items-center justify-content-center border-0 p-0 me-3" style={{ width: '40px', height: '40px' }} onClick={() => navigate('/shipments')}>
+                        <FiArrowLeft className="fs-5" />
+                    </Button>
+                    <h2 className="fw-bold mb-0 text-dark">{isEditMode ? "Edit Shipment" : "Add New Shipment"}</h2>
                 </div>
 
                 <Card className="border-0 shadow-sm custom-card">
@@ -170,8 +168,9 @@ const AddShipment = () => {
                                 <Form.Control
                                     type="text"
                                     className={getFieldClass('orderId')}
-                                    placeholder="Enter Shipment ID (e.g. ORD-10001)"
+                                    placeholder="Enter Shipment ID"
                                     aria-invalid={errors.orderId ? 'true' : 'false'}
+                                    disabled={isEditMode}
                                     {...register('orderId', {
                                         required: 'Shipment ID is required',
                                         pattern: {
@@ -203,7 +202,7 @@ const AddShipment = () => {
                                 <Form.Control
                                     type="text"
                                     className={getFieldClass('fromLocation')}
-                                    placeholder="Enter origin city or hub"
+                                    placeholder="Enter from location"
                                     aria-invalid={errors.fromLocation ? 'true' : 'false'}
                                     {...register('fromLocation', {
                                         required: 'From Location is required',
@@ -220,7 +219,7 @@ const AddShipment = () => {
                                 <Form.Control
                                     type="text"
                                     className={getFieldClass('toLocation')}
-                                    placeholder="Enter destination city or hub"
+                                    placeholder="Enter to location"
                                     aria-invalid={errors.toLocation ? 'true' : 'false'}
                                     {...register('toLocation', {
                                         required: 'To Location is required',
@@ -241,7 +240,7 @@ const AddShipment = () => {
                                 <Form.Control
                                     type="text"
                                     className={getFieldClass('customerName')}
-                                    placeholder="Enter customer or company name"
+                                    placeholder="Enter customer name"
                                     aria-invalid={errors.customerName ? 'true' : 'false'}
                                     {...register('customerName', {
                                         required: 'Customer Name is required',
@@ -259,7 +258,7 @@ const AddShipment = () => {
                                     type="tel"
                                     maxLength={10}
                                     className={getFieldClass('customerPhone')}
-                                    placeholder="Enter 10 digit phone number"
+                                    placeholder="Enter custome phone number"
                                     aria-invalid={errors.customerPhone ? 'true' : 'false'}
                                     {...register('customerPhone', {
                                         required: 'Customer Phone Number is required',
@@ -280,7 +279,7 @@ const AddShipment = () => {
                                 <Form.Control
                                     type="text"
                                     className={getFieldClass('driverName')}
-                                    placeholder="Enter driver's full name"
+                                    placeholder="Enter driver name"
                                     aria-invalid={errors.driverName ? 'true' : 'false'}
                                     {...register('driverName', {
                                         required: 'Driver Name is required',
@@ -298,7 +297,7 @@ const AddShipment = () => {
                                     type="tel"
                                     maxLength={10}
                                     className={getFieldClass('driverPhone')}
-                                    placeholder="Enter 10 digit phone number"
+                                    placeholder="Enter driver phone number"
                                     aria-invalid={errors.driverPhone ? 'true' : 'false'}
                                     {...register('driverPhone', {
                                         required: 'Driver Phone Number is required',
@@ -382,7 +381,7 @@ const AddShipment = () => {
                                 {isSubmitting ? <Spinner animation="border" size="sm" /> : <FiSave />}
                                 {isSubmitting ? (isEditMode ? 'Updating...' : 'Saving...') : (isEditMode ? 'Update Shipment' : 'Save Shipment')}
                             </Button>
-                            <Button variant="light" className="px-4 fw-bold text-secondary border shadow-sm rounded-3" onClick={() => navigate('/shipments')} disabled={isSubmitting}>Cancel</Button>
+                            <Button variant="light" className="px-4 fw-bold text-secondary border shadow-sm rounded-3 btn-light-two" onClick={() => navigate('/shipments')} disabled={isSubmitting}>Cancel</Button>
                         </div>
                     </Card.Body>
                 </Card>

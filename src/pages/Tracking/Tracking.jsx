@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Form, Button, Row, Col, Card, Spinner } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import PageTitle from '../../components/PageTitle/PageTitle';
@@ -22,8 +22,23 @@ const Tracking = () => {
         shipmentId: '',
         location: '',
         remarks: '',
-        status: 'BOOKED'
+        status: ''
     });
+    // Searchable dropdown state
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [dropdownSearch, setDropdownSearch] = useState('');
+    const dropdownRef = useRef(null);
+
+    // Close dropdown on outside click
+    useEffect(() => {
+        const handleClick = (e) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+                setDropdownOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClick);
+        return () => document.removeEventListener('mousedown', handleClick);
+    }, []);
 
     useEffect(() => {
         const fetchShipmentOptions = async () => {
@@ -61,7 +76,7 @@ const Tracking = () => {
                 ...current,
                 shipmentId,
                 location: shipment?.currentLocation || '',
-                status: shipment?.currentStatus || 'BOOKED',
+                status: '',
             }));
         } catch (error) {
             const message = error.response?.data?.message || 'Unable to load shipment details.';
@@ -88,7 +103,7 @@ const Tracking = () => {
         if (isDestination && update.status !== 'DELIVERED') {
             setUpdate(prev => ({ ...prev, status: 'DELIVERED' }));
         } else if (!isDestination && update.status === 'DELIVERED') {
-            setUpdate(prev => ({ ...prev, status: 'IN_TRANSIT' }));
+            setUpdate(prev => ({ ...prev, status: '' }));
         }
     }, [update.location, selectedShipmentData]);
 
@@ -97,6 +112,11 @@ const Tracking = () => {
 
         if (!update.shipmentId) {
             toast.error('Please select a shipment.');
+            return;
+        }
+
+        if (!update.status) {
+            toast.error('Please select a status.');
             return;
         }
 
@@ -136,20 +156,56 @@ const Tracking = () => {
                             <Form onSubmit={handleSubmit}>
                                 <Form.Group className="mb-3">
                                     <Form.Label>Select Shipment</Form.Label>
-                                    <Form.Select
-                                        value={selectedShipmentId}
-                                        onChange={(e) => setSelectedShipmentId(e.target.value)}
-                                        disabled={isLoadingOptions}
-                                    >
-                                        <option value="">
-                                            {isLoadingOptions ? 'Loading shipments...' : 'Choose Shipment...'}
-                                        </option>
-                                        {shipmentOptions.map((shipment) => (
-                                            <option key={shipment._id} value={shipment._id}>
-                                                {shipment.displayLabel}
-                                            </option>
-                                        ))}
-                                    </Form.Select>
+                                    <div className="trk-searchable-dropdown" ref={dropdownRef}>
+                                        <div
+                                            className={`trk-dropdown-trigger ${dropdownOpen ? 'open' : ''}`}
+                                            onClick={() => !isLoadingOptions && setDropdownOpen(o => !o)}
+                                        >
+                                            <span className={selectedShipmentId ? 'trk-selected-label' : 'trk-placeholder'}>
+                                                {isLoadingOptions
+                                                    ? 'Loading shipments...'
+                                                    : selectedShipmentId
+                                                        ? shipmentOptions.find(s => s._id === selectedShipmentId)?.displayLabel || 'Choose Shipment...'
+                                                        : 'Choose Shipment...'}
+                                            </span>
+                                            <span className="trk-chevron">&#8964;</span>
+                                        </div>
+                                        {dropdownOpen && (
+                                            <div className="trk-dropdown-panel">
+                                                <div className="trk-search-wrap">
+                                                    <input
+                                                        autoFocus
+                                                        type="text"
+                                                        className="trk-search-input"
+                                                        placeholder="Search shipment..."
+                                                        value={dropdownSearch}
+                                                        onChange={e => setDropdownSearch(e.target.value)}
+                                                    />
+                                                </div>
+                                                <ul className="trk-options-list">
+                                                    {shipmentOptions
+                                                        .filter(s => s.displayLabel.toLowerCase().includes(dropdownSearch.toLowerCase()))
+                                                        .map(shipment => (
+                                                            <li
+                                                                key={shipment._id}
+                                                                className={`trk-option-item ${selectedShipmentId === shipment._id ? 'selected' : ''}`}
+                                                                onClick={() => {
+                                                                    setSelectedShipmentId(shipment._id);
+                                                                    setDropdownOpen(false);
+                                                                    setDropdownSearch('');
+                                                                }}
+                                                            >
+                                                                {shipment.displayLabel}
+                                                            </li>
+                                                        ))
+                                                    }
+                                                    {shipmentOptions.filter(s => s.displayLabel.toLowerCase().includes(dropdownSearch.toLowerCase())).length === 0 && (
+                                                        <li className="trk-option-empty">No results found</li>
+                                                    )}
+                                                </ul>
+                                            </div>
+                                        )}
+                                    </div>
                                 </Form.Group>
 
                                 <Form.Group className="mb-3">
@@ -181,8 +237,9 @@ const Tracking = () => {
                                             } else {
                                                 return (
                                                     <>
+                                                        <option value="" disabled>Select Status</option>
                                                         <option value="BOOKED">Booked</option>
-                                                        <option value="DISPATCH">Dispatch</option>
+                                                        {/* <option value="DISPATCH">Dispatch</option> */}
                                                         <option value="IN_TRANSIT">In Transit</option>
                                                         <option value="DELAYED">Delayed</option>
                                                     </>
@@ -295,8 +352,8 @@ const Tracking = () => {
                             </div>
                         ) : (
                             <div className="d-flex flex-column align-items-center justify-content-center h-75 text-muted text-center pt-5">
-                                <div className="bg-light rounded-circle p-4 mb-3">
-                                    <FaLocationArrow className="fs-1 text-secondary opacity-50" />
+                                <div className="bg-light rounded-circle p-4 mb-3 d-flex align-items-center justify-content-center" style={{ width: '90px', height: '90px' }}>
+                                    <img src={`${import.meta.env.BASE_URL}img/truck-icon.png`} alt="Truck" style={{ width: '90px', height: '90px', objectFit: 'contain', opacity: 0.7 }} />
                                 </div>
                                 <h5 className="fw-bold">No Shipment Selected</h5>
                                 <p className="mb-0 mx-4" style={{ fontSize: '0.9rem' }}>

@@ -22,7 +22,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             <div className={`sidebar shadow-sm ${isOpen ? 'sidebar-open' : ''}`}>
                 {/* Brand */}
                 <div className="sidebar-brand-wrap">
-                    <img src="/img/logo.jpg" alt="Taakt Logo" className="sidebar-logo" />
+                    <img src={`${import.meta.env.BASE_URL}img/logo.jpg`} alt="Taakt Logo" className="sidebar-logo" />
                     {/* Mobile close button */}
                     <button className="sidebar-close-btn d-lg-none" onClick={onClose}>
                         <FiX size={20} />

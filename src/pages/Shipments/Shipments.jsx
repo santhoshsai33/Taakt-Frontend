@@ -220,17 +220,19 @@ const Shipments = () => {
                                 <td className="py-3 fw-bold text-dark" style={{ whiteSpace: 'nowrap' }}>{shipment.toLocation}</td>
                                 <td className="py-3" style={{ whiteSpace: 'nowrap' }}><StatusBadge status={shipment.currentStatus} /></td>
                                 <td className="py-3 px-3">
-                                    <div className="d-flex justify-content-center gap-2">
+                                    <div className="d-flex justify-content-start gap-2">
                                         <button
                                             className="tbl-action-btn tbl-action-view"
                                             title="View"
                                             onClick={() => navigate(`/shipments/view/${shipment._id}`)}
                                         ><FaEye /></button>
-                                        <button
-                                            className="tbl-action-btn tbl-action-edit"
-                                            title="Edit"
-                                            onClick={() => navigate(`/shipments/edit/${shipment._id}`)}
-                                        ><FaEdit /></button>
+                                        {shipment.currentStatus !== 'DELIVERED' && (
+                                            <button
+                                                className="tbl-action-btn tbl-action-edit"
+                                                title="Edit"
+                                                onClick={() => navigate(`/shipments/edit/${shipment._id}`)}
+                                            ><FaEdit /></button>
+                                        )}
                                         <button
                                             className="tbl-action-btn tbl-action-delete"
                                             title="Delete"

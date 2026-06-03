@@ -46,7 +46,7 @@ const Login = () => {
             {/* Left Side — Aesthetic Image & Brand */}
             <div className="d-none d-lg-flex col-lg-8 position-relative align-items-center justify-content-center bg-light">
                 <img
-                    src="/img/login-img.png"
+                    src={`${import.meta.env.BASE_URL}img/login-img.png`}
                     alt="Warehouse"
                     className="position-absolute w-100 h-100"
                     style={{ objectFit: 'cover' }}
@@ -59,7 +59,7 @@ const Login = () => {
 
                     {/* Mobile Logo */}
                     <div className="text-center d-lg-none mb-4">
-                        <img src="/img/logo.jpg" alt="Taakt Logo" style={{ height: '60px', width: 'auto', objectFit: 'contain' }} />
+                        <img src={`${import.meta.env.BASE_URL}img/logo.jpg`} alt="Taakt Logo" style={{ height: '60px', width: 'auto', objectFit: 'contain' }} />
                     </div>
 
                     <h2 className="fw-bold text-dark mb-2">Welcome</h2>
@@ -121,7 +121,7 @@ const Login = () => {
                                     onClick={() => setShowPassword((current) => !current)}
                                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                                 >
-                                    {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                                    {showPassword ? <FiEye size={18} /> : <FiEyeOff size={18} />}
                                 </button>
                                 {errors.password && <div className="text-danger mt-1" style={{ fontSize: '0.75rem' }}>{errors.password.message}</div>}
                             </div>
