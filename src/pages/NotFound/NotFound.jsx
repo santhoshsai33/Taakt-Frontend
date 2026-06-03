@@ -57,7 +57,7 @@ const NotFound = () => {
     return (
         <div style={pageStyles.wrapper}>
             <div style={pageStyles.content}>
-                <img src="/img/logo.jpg" alt="Taakt Logistics" style={pageStyles.logo} />
+                <img src={`${import.meta.env.BASE_URL}img/logo.jpg`} alt="Taakt Logistics" style={pageStyles.logo} />
                 <h1 style={pageStyles.title}>404</h1>
                 <p style={pageStyles.text}>Oops! Page not found</p>
                 <Link to="/dashboard" style={pageStyles.link}>
