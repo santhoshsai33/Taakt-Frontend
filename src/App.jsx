@@ -48,7 +48,7 @@ const ProtectedShell = () => {
 function App() {
   return (
     <AppProvider>
-      <Router basename="/taakt">
+      <Router basename="/">
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={
