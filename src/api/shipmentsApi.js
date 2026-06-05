@@ -8,12 +8,13 @@ export const getShipmentDashboard = () => {
   return axiosClient.get('/shipments/dashboard');
 };
 
-export const getShipmentList = ({ page = 1, pageSize = 5, search = '' } = {}) => {
+export const getShipmentList = ({ page = 1, pageSize = 5, search = '', tripType = '' } = {}) => {
   return axiosClient.get('/shipments/list', {
     params: {
       page,
       limit: pageSize,
       ...(search ? { search } : {}),
+      ...(tripType ? { tripType } : {}),
     },
   });
 };

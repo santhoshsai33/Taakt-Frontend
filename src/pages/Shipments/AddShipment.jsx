@@ -377,14 +377,14 @@ const AddShipment = () => {
                             <h6 className="fw-bold mb-3 mt-0 text-dark">Dispatch Info</h6>
 
                             <Col md={6}>
-                                <Form.Label className="fw-semibold text-secondary">{requiredLabel('Dispatch Date')}</Form.Label>
+                                <Form.Label className="fw-semibold text-secondary">{requiredLabel('Expected Delivery Date')}</Form.Label>
                                 <Form.Control
                                     type="date"
                                     className={getFieldClass('dispatchDate')}
                                     min={minDispatchDate}
                                     aria-invalid={errors.dispatchDate ? 'true' : 'false'}
                                     {...register('dispatchDate', {
-                                        required: 'Dispatch Date is required',
+                                        required: 'Expected Delivery Date is required',
                                         validate: (value) => isValidDispatchDate(value) || 'Dispatch Date cannot be in the past',
                                     })}
                                 />

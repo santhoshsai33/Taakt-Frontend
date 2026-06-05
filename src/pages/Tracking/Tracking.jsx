@@ -18,6 +18,8 @@ const Tracking = () => {
     const [isLoadingOptions, setIsLoadingOptions] = useState(true);
     const [isLoadingDetails, setIsLoadingDetails] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [locationError, setLocationError] = useState('');
+    const [statusError, setStatusError] = useState('');
     const [update, setUpdate] = useState({
         shipmentId: '',
         location: '',
@@ -77,7 +79,10 @@ const Tracking = () => {
                 shipmentId,
                 location: shipment?.currentLocation || '',
                 status: '',
+                remarks: '',
             }));
+            setLocationError('');
+            setStatusError('');
         } catch (error) {
             const message = error.response?.data?.message || 'Unable to load shipment details.';
             toast.error(message);
@@ -102,6 +107,7 @@ const Tracking = () => {
 
         if (isDestination && update.status !== 'DELIVERED') {
             setUpdate(prev => ({ ...prev, status: 'DELIVERED' }));
+            setStatusError('');
         } else if (!isDestination && update.status === 'DELIVERED') {
             setUpdate(prev => ({ ...prev, status: '' }));
         }
@@ -115,11 +121,19 @@ const Tracking = () => {
             return;
         }
 
+        if (!update.location.trim()) {
+            setLocationError('Current location is required');
+            toast.error('Please enter current location.');
+            return;
+        }
+
         if (!update.status) {
+            setStatusError('Status is required');
             toast.error('Please select a status.');
             return;
         }
 
+        setStatusError('');
         setIsSubmitting(true);
 
         try {
@@ -218,22 +232,32 @@ const Tracking = () => {
                                 </Form.Group>
 
                                 <Form.Group className="mb-3">
-                                    <Form.Label>Current Location</Form.Label>
+                                    <Form.Label>Current Location <span className="text-danger">*</span></Form.Label>
                                     <Form.Control
                                         type="text"
-                                        required
                                         placeholder="e.g., Bangalore"
                                         value={update.location}
-                                        onChange={(e) => setUpdate({ ...update, location: e.target.value })}
+                                        onChange={(e) => {
+                                            setUpdate({ ...update, location: e.target.value });
+                                            if (locationError) {
+                                                setLocationError('');
+                                            }
+                                        }}
                                         disabled={!selectedShipmentId || isLoadingDetails}
                                     />
+                                    {locationError && <div className="form-error-text mt-1">{locationError}</div>}
                                 </Form.Group>
 
                                 <Form.Group className="mb-3">
-                                    <Form.Label>Status</Form.Label>
+                                    <Form.Label>Status <span className="text-danger">*</span></Form.Label>
                                     <Form.Select
                                         value={update.status}
-                                        onChange={(e) => setUpdate({ ...update, status: e.target.value })}
+                                        onChange={(e) => {
+                                            setUpdate({ ...update, status: e.target.value });
+                                            if (statusError) {
+                                                setStatusError('');
+                                            }
+                                        }}
                                         disabled={!selectedShipmentId || isLoadingDetails}
                                     >
                                         {(() => {
@@ -256,6 +280,7 @@ const Tracking = () => {
                                             }
                                         })()}
                                     </Form.Select>
+                                    {statusError && <div className="form-error-text mt-1">{statusError}</div>}
                                 </Form.Group>
 
                                 <Form.Group className="mb-4">
