@@ -13,13 +13,15 @@ const tripTypeOptions = [
     { value: 'LONG_TRIP', label: 'Long Trip' },
 ];
 
-const statusOptions = [
+const createStatusOptions = [
     { value: 'BOOKED', label: 'Booked' },
     { value: 'READY_TO_DISPATCH', label: 'Ready To Dispatch' },
+];
+
+const editStatusOptions = [
     { value: 'IN_TRANSIT', label: 'In Transit' },
     { value: 'DELIVERED', label: 'Delivered' },
     { value: 'DELAYED', label: 'Delayed' },
-
 ];
 
 const idPattern = /^[A-Za-z0-9-]+$/;
@@ -60,6 +62,7 @@ const AddShipment = () => {
     const navigate = useNavigate();
     const { id } = useParams();
     const isEditMode = !!id;
+    const statusOptions = isEditMode ? editStatusOptions : createStatusOptions;
 
     const {
         register,
@@ -85,6 +88,12 @@ const AddShipment = () => {
             remarks: '',
         },
     });
+
+    const selectedStatus = watch('status');
+    const editStatusDisplayOptions =
+        isEditMode && selectedStatus && !editStatusOptions.some((option) => option.value === selectedStatus)
+            ? [{ value: selectedStatus, label: toTitleCase(selectedStatus), disabled: true }, ...editStatusOptions]
+            : statusOptions;
 
     useEffect(() => {
         if (isEditMode) {
@@ -357,7 +366,7 @@ const AddShipment = () => {
                                         className="position-absolute text-muted"
                                         style={{ right: '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '0.75rem', pointerEvents: 'none' }}
                                     >
-                                        {(watch('vehicleNumber') || '').length}/13
+                                        {/* {(watch('vehicleNumber') || '').length}/13 */}
                                     </span>
                                 </div>
 
@@ -372,16 +381,11 @@ const AddShipment = () => {
                                 <Form.Control
                                     type="date"
                                     className={getFieldClass('dispatchDate')}
-                                    min={!isEditMode ? minDispatchDate : undefined}
+                                    min={minDispatchDate}
                                     aria-invalid={errors.dispatchDate ? 'true' : 'false'}
                                     {...register('dispatchDate', {
                                         required: 'Dispatch Date is required',
-                                        validate: (value) => {
-                                            if (isEditMode) {
-                                                return true;
-                                            }
-                                            return isValidDispatchDate(value) || 'Dispatch Date cannot be in the past';
-                                        },
+                                        validate: (value) => isValidDispatchDate(value) || 'Dispatch Date cannot be in the past',
                                     })}
                                 />
                                 {errors.dispatchDate && <div className="form-error-text">{errors.dispatchDate.message}</div>}
@@ -396,8 +400,10 @@ const AddShipment = () => {
                                     })}
                                 >
                                     <option value="">Select status</option>
-                                    {statusOptions.map((option) => (
-                                        <option key={option.value} value={option.value}>{option.label}</option>
+                                    {editStatusDisplayOptions.map((option) => (
+                                        <option key={option.value} value={option.value} disabled={option.disabled}>
+                                            {option.label}
+                                        </option>
                                     ))}
                                 </Form.Select>
                                 {errors.status && <div className="form-error-text">{errors.status.message}</div>}
@@ -410,12 +416,7 @@ const AddShipment = () => {
                                     className={getFieldClass('remarks')}
                                     placeholder="Enter remarks"
                                     aria-invalid={errors.remarks ? 'true' : 'false'}
-                                    {...register('remarks', {
-                                        pattern: {
-                                            value: textPattern,
-                                            message: 'Remarks can contain only letters, numbers, and spaces',
-                                        },
-                                    })}
+                                    {...register('remarks')}
                                 />
                                 {errors.remarks && <div className="form-error-text">{errors.remarks.message}</div>}
                             </Col>

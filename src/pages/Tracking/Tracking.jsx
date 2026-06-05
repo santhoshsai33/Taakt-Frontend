@@ -154,6 +154,7 @@ const Tracking = () => {
         <div>
             <PageTitle title="Update Tracking" subtitle="Manually update shipment progress and location." />
 
+
             <Row className="mb-4">
                 <Col md={5}>
                     <Card className="border-0 shadow-sm rounded-4 h-100">

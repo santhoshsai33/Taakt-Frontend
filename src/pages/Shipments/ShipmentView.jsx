@@ -11,11 +11,14 @@ const formatEnumLabel = (value = '') => {
     return value.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (letter) => letter.toUpperCase());
 };
 
+const REMARK_PREVIEW_LIMIT = 120;
+
 const ShipmentView = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [shipment, setShipment] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [isRemarkExpanded, setIsRemarkExpanded] = useState(false);
 
     useEffect(() => {
         const fetchDetails = async () => {
@@ -23,6 +26,7 @@ const ShipmentView = () => {
             try {
                 const res = await getShipmentDetails(id);
                 setShipment(res.data?.data?.shipment);
+                setIsRemarkExpanded(false);
             } catch (error) {
                 toast.error('Failed to fetch shipment details');
             } finally {
@@ -34,6 +38,36 @@ const ShipmentView = () => {
             fetchDetails();
         }
     }, [id]);
+
+    const renderRemark = (remark) => {
+        const trimmedRemark = remark?.trim();
+
+        if (!trimmedRemark) {
+            return null;
+        }
+
+        const isLongRemark = trimmedRemark.length > REMARK_PREVIEW_LIMIT;
+        const displayRemark = isLongRemark && !isRemarkExpanded
+            ? `${trimmedRemark.slice(0, REMARK_PREVIEW_LIMIT)}...`
+            : trimmedRemark;
+
+        return (
+            <div className="mt-2">
+                <p className="mb-2 text-secondary" style={{ whiteSpace: 'pre-wrap' }}>
+                    {displayRemark}
+                </p>
+                {isLongRemark && (
+                    <Button
+                        variant="link"
+                        className="p-0 text-decoration-none fw-semibold"
+                        onClick={() => setIsRemarkExpanded((prev) => !prev)}
+                    >
+                        {isRemarkExpanded ? 'Hide remark' : 'Show remark'}
+                    </Button>
+                )}
+            </div>
+        );
+    };
 
     if (isLoading) {
         return (
@@ -79,6 +113,23 @@ const ShipmentView = () => {
                                     <StatusBadge status={shipment.currentStatus} />
                                 </div>
                             </div>
+
+                            <Row className="g-4 mb-4">
+                                <Col md={6}>
+                                    <p className="text-muted mb-1 fs-sm fw-bold">Current Location</p>
+                                    <h6 className="fw-bold text-dark mb-0">{shipment.currentLocation || 'N/A'}</h6>
+                                </Col>
+                                <Col md={6}>
+                                    <p className="text-muted mb-1 fs-sm fw-bold">Current Status</p>
+                                    <StatusBadge status={shipment.currentStatus} />
+                                </Col>
+                                {shipment.remarks?.trim() && (
+                                    <Col md={12}>
+                                        <p className="text-muted mb-1 fs-sm fw-bold">Remarks</p>
+                                        {renderRemark(shipment.remarks)}
+                                    </Col>
+                                )}
+                            </Row>
 
                             {/* Route Info */}
                             <h6 className="fw-bold text-dark mb-3">Route Information</h6>
