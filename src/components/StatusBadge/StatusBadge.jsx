@@ -6,6 +6,7 @@ const StatusBadge = ({ status = '' }) => {
             case 'dispatched': return 'badge-dispatched';
             case 'dispatch': return 'badge-dispatched';
             case 'booked': return 'badge-dispatched';
+            case 'ready to dispatch': return 'badge-dispatched';
             case 'in transit': return 'badge-in-transit';
             case 'delivered': return 'badge-delivered';
             case 'delayed': return 'badge-busy';

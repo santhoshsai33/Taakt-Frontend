@@ -19,8 +19,9 @@ const createStatusOptions = [
 ];
 
 const editStatusOptions = [
-    { value: 'IN_TRANSIT', label: 'In Transit' },
-    { value: 'DELIVERED', label: 'Delivered' },
+    // { value: 'IN_TRANSIT', label: 'In Transit' },
+    { value: 'READY_TO_DISPATCH', label: 'Ready To Dispatch' },
+    // { value: 'DELIVERED', label: 'Delivered' },
     { value: 'DELAYED', label: 'Delayed' },
 ];
 

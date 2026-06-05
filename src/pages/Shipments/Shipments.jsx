@@ -32,6 +32,10 @@ const isBookedStatus = (status = '') => {
     return String(status).replace(/\s+/g, '_').toUpperCase() === 'BOOKED';
 };
 
+const isInTransitStatus = (status = '') => {
+    return String(status).replace(/\s+/g, '_').toUpperCase() === 'IN_TRANSIT';
+};
+
 const Shipments = () => {
     const navigate = useNavigate();
 
@@ -244,7 +248,7 @@ const Shipments = () => {
                                             title="View"
                                             onClick={() => navigate(`/shipments/view/${shipment._id}`)}
                                         ><FaEye /></button>
-                                        {shipment.currentStatus !== 'DELIVERED' && (
+                                        {!isInTransitStatus(shipment.currentStatus) && shipment.currentStatus !== 'DELIVERED' && (
                                             <button
                                                 className="tbl-action-btn tbl-action-edit"
                                                 title="Edit"
