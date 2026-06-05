@@ -3,7 +3,7 @@ import { Form, Button, Row, Col, Card, Spinner } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import PageTitle from '../../components/PageTitle/PageTitle';
 import StatusBadge from '../../components/StatusBadge/StatusBadge';
-import { FaMapMarkerAlt, FaLocationArrow } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaLocationArrow, FaChevronDown } from 'react-icons/fa';
 import { getShipmentDetails, getShipmentDropdownOptions, updateShipment } from '../../api/shipmentsApi';
 
 const formatEnumLabel = (value = '') => {
@@ -176,7 +176,7 @@ const Tracking = () => {
                                                         ? shipmentOptions.find(s => s._id === selectedShipmentId)?.displayLabel || 'Choose Shipment...'
                                                         : 'Choose Shipment...'}
                                             </span>
-                                            <span className="trk-chevron">&#8964;</span>
+                                            <FaChevronDown className="trk-chevron" />
                                         </div>
                                         {dropdownOpen && (
                                             <div className="trk-dropdown-panel">
@@ -246,7 +246,7 @@ const Tracking = () => {
                                                 return (
                                                     <>
                                                         <option value="" disabled>Select Status</option>
-                                                        <option value="BOOKED">Booked</option>
+                                                        {/* <option value="BOOKED">Booked</option> */}
                                                         {/* <option value="DISPATCH">Dispatch</option> */}
                                                         <option value="IN_TRANSIT">In Transit</option>
                                                         <option value="DELAYED">Delayed</option>

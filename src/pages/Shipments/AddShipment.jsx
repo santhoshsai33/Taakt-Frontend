@@ -15,21 +15,44 @@ const tripTypeOptions = [
 
 const statusOptions = [
     { value: 'BOOKED', label: 'Booked' },
+    { value: 'READY_TO_DISPATCH', label: 'Ready To Dispatch' },
     { value: 'IN_TRANSIT', label: 'In Transit' },
     { value: 'DELIVERED', label: 'Delivered' },
     { value: 'DELAYED', label: 'Delayed' },
-    { value: 'DISPATCH', label: 'Dispatch' },
+
 ];
 
 const idPattern = /^[A-Za-z0-9-]+$/;
 const textPattern = /^[A-Za-z0-9 ]+$/;
 const phonePattern = /^[6-9][0-9]{9}$/;
+// Indian vehicle number: e.g.  MH12AB1234  or  MH 12 AB 1234
+const vehiclePattern = /^[A-Z]{2}[\s-]?[0-9]{1,2}[\s-]?[A-Z]{1,3}[\s-]?[0-9]{4}$/;
 
 const toTitleCase = (value) => {
     return value
         .toLowerCase()
         .replace(/_/g, ' ')
         .replace(/\b\w/g, (letter) => letter.toUpperCase());
+};
+
+const getMinDispatchDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
+
+const minDispatchDate = getMinDispatchDate();
+
+const isValidDispatchDate = (dateValue) => {
+    if (!dateValue) {
+        return false;
+    }
+
+    const selected = new Date(`${dateValue}T00:00:00`);
+    const minimum = new Date(`${minDispatchDate}T00:00:00`);
+    return selected >= minimum;
 };
 
 const AddShipment = () => {
@@ -42,6 +65,7 @@ const AddShipment = () => {
         register,
         handleSubmit,
         reset,
+        watch,
         formState: { errors, isSubmitting },
     } = useForm({
         mode: 'onTouched',
@@ -311,19 +335,33 @@ const AddShipment = () => {
                             </Col>
                             <Col md={12}>
                                 <Form.Label className="fw-semibold text-secondary">Vehicle Number</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    className={getFieldClass('vehicleNumber')}
-                                    placeholder="Enter vehicle number"
-                                    aria-invalid={errors.vehicleNumber ? 'true' : 'false'}
-                                    {...register('vehicleNumber', {
-                                        pattern: {
-                                            value: textPattern,
-                                            message: 'Vehicle Number can contain only letters, numbers, and spaces',
-                                        },
-                                    })}
-                                />
-                                {errors.vehicleNumber && <div className="form-error-text">{errors.vehicleNumber.message}</div>}
+                                <div className="position-relative">
+                                    <Form.Control
+                                        type="text"
+                                        maxLength={13}
+                                        className={getFieldClass('vehicleNumber')}
+                                        placeholder="e.g. MH12AB1234"
+                                        aria-invalid={errors.vehicleNumber ? 'true' : 'false'}
+                                        {...register('vehicleNumber', {
+                                            pattern: {
+                                                value: vehiclePattern,
+                                                message: 'Invalid format. Use: MH12AB1234 or MH 12 AB 1234',
+                                            },
+                                            setValueAs: (v) => v.toUpperCase(),
+                                        })}
+                                        onChange={(e) => {
+                                            e.target.value = e.target.value.toUpperCase();
+                                        }}
+                                    />
+                                    <span
+                                        className="position-absolute text-muted"
+                                        style={{ right: '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '0.75rem', pointerEvents: 'none' }}
+                                    >
+                                        {(watch('vehicleNumber') || '').length}/13
+                                    </span>
+                                </div>
+
+                                {errors.vehicleNumber && <div className="form-error-text mt-1">{errors.vehicleNumber.message}</div>}
                             </Col>
 
                             <div className="w-100 my-2"><hr className="text-muted" opacity="0.1" /></div>
@@ -334,9 +372,16 @@ const AddShipment = () => {
                                 <Form.Control
                                     type="date"
                                     className={getFieldClass('dispatchDate')}
+                                    min={!isEditMode ? minDispatchDate : undefined}
                                     aria-invalid={errors.dispatchDate ? 'true' : 'false'}
                                     {...register('dispatchDate', {
                                         required: 'Dispatch Date is required',
+                                        validate: (value) => {
+                                            if (isEditMode) {
+                                                return true;
+                                            }
+                                            return isValidDispatchDate(value) || 'Dispatch Date cannot be in the past';
+                                        },
                                     })}
                                 />
                                 {errors.dispatchDate && <div className="form-error-text">{errors.dispatchDate.message}</div>}

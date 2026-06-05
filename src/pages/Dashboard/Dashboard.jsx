@@ -21,6 +21,13 @@ const emptyDashboard = {
     recentShipments: [],
 };
 
+const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) return 'Good morning';
+    if (hour >= 12 && hour < 17) return 'Good afternoon';
+    return 'Good evening';
+};
+
 const formatEnumLabel = (value = '') => {
     return value.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (letter) => letter.toUpperCase());
 };
@@ -105,7 +112,7 @@ const Dashboard = () => {
             <DashboardCard className="mb-4 glass-welcome">
                 <Row className="align-items-center">
                     <Col md={8}>
-                        <h3 className="fw-bolder text-dark mb-1">Good morning, Admin!</h3>
+                        <h3 className="fw-bolder text-dark mb-1">{getGreeting()}, Admin!</h3>
                         <p className="text-secondary fw-medium mb-0 d-flex align-items-center gap-2">
                             <FaCalendarAlt className="text-muted" /> {todayDate}
                         </p>

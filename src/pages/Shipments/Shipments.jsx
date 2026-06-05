@@ -20,6 +20,18 @@ const formatEnumLabel = (value = '') => {
     return value.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (letter) => letter.toUpperCase());
 };
 
+// Resolve trip type enum from free-text search
+const resolveTripType = (query = '') => {
+    const q = query.trim().toLowerCase().replace(/[\s_]+/g, '');
+    if (q === 'shorttrip' || q === 'short') return 'SHORT_TRIP';
+    if (q === 'longtrip' || q === 'long') return 'LONG_TRIP';
+    return '';
+};
+
+const isBookedStatus = (status = '') => {
+    return String(status).replace(/\s+/g, '_').toUpperCase() === 'BOOKED';
+};
+
 const Shipments = () => {
     const navigate = useNavigate();
 
@@ -47,7 +59,13 @@ const Shipments = () => {
         const fetchShipments = async () => {
             setIsLoading(true);
             try {
-                const response = await getShipmentList({ page, pageSize, search: debouncedSearch });
+                const tripType = resolveTripType(debouncedSearch);
+                const response = await getShipmentList({
+                    page,
+                    pageSize,
+                    search: tripType ? '' : debouncedSearch,
+                    tripType,
+                });
                 const data = response.data?.data;
                 setShipments(data?.items || []);
                 setPagination(data?.pagination || defaultPagination);
@@ -72,6 +90,8 @@ const Shipments = () => {
     };
 
     const handleDeleteClick = (shipment) => {
+        if (!isBookedStatus(shipment?.currentStatus)) return;
+
         setShipmentToDelete(shipment);
         setShowDeleteModal(true);
     };
@@ -170,7 +190,7 @@ const Shipments = () => {
                     <input
                         type="text"
                         className="shp-search-input"
-                        placeholder="Search by ID, location, customer..."
+                        placeholder="Search by ID, location, customer, trip type..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -187,10 +207,9 @@ const Shipments = () => {
                     <thead className="bg-light">
                         <tr>
                             <th className="py-3 px-4 rounded-start">Shipment ID</th>
-                            <th className="py-3">Reference ID</th>
                             <th className="py-3">Trip Type</th>
                             <th className="py-3">From</th>
-                            <th className="py-3">Current Loc</th>
+                            <th className="py-3">Current Location</th>
                             <th className="py-3">To</th>
                             <th className="py-3">Status</th>
                             <th className="py-3 px-4 rounded-end text-center">Action</th>
@@ -199,7 +218,7 @@ const Shipments = () => {
                     <tbody>
                         {isLoading && (
                             <tr>
-                                <td colSpan={8} className="text-center py-5">
+                                <td colSpan={7} className="text-center py-5">
                                     <Spinner animation="border" size="sm" className="me-2" />
                                     Loading shipments...
                                 </td>
@@ -207,13 +226,12 @@ const Shipments = () => {
                         )}
                         {!isLoading && shipments.length === 0 && (
                             <tr>
-                                <td colSpan={8} className="text-center text-muted py-5">No shipments found.</td>
+                                <td colSpan={7} className="text-center text-muted py-5">No shipments found.</td>
                             </tr>
                         )}
                         {!isLoading && shipments.map((shipment) => (
                             <tr key={shipment._id}>
                                 <td className="py-3 px-3 fw-bold text-primary" style={{ whiteSpace: 'nowrap' }}>{shipment.orderId}</td>
-                                <td className="py-3 text-secondary fw-medium" style={{ whiteSpace: 'nowrap' }}>{shipment.referenceId}</td>
                                 <td className="py-3 text-secondary fw-medium" style={{ whiteSpace: 'nowrap' }}>{formatEnumLabel(shipment.tripType)}</td>
                                 <td className="py-3 fw-bold text-dark" style={{ whiteSpace: 'nowrap' }}>{shipment.fromLocation}</td>
                                 <td className="py-3 text-primary fw-semibold" style={{ whiteSpace: 'nowrap' }}>{shipment.currentLocation}</td>
@@ -233,11 +251,13 @@ const Shipments = () => {
                                                 onClick={() => navigate(`/shipments/edit/${shipment._id}`)}
                                             ><FaEdit /></button>
                                         )}
-                                        <button
-                                            className="tbl-action-btn tbl-action-delete"
-                                            title="Delete"
-                                            onClick={() => handleDeleteClick(shipment)}
-                                        ><FaTrash /></button>
+                                        {isBookedStatus(shipment.currentStatus) && (
+                                            <button
+                                                className="tbl-action-btn tbl-action-delete"
+                                                title="Delete"
+                                                onClick={() => handleDeleteClick(shipment)}
+                                            ><FaTrash /></button>
+                                        )}
                                     </div>
                                 </td>
                             </tr>
