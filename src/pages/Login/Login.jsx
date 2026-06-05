@@ -49,7 +49,6 @@ const Login = () => {
                     src={`${import.meta.env.BASE_URL}img/login-img.png`}
                     alt="Warehouse"
                     className="position-absolute w-100 h-100"
-                    style={{ objectFit: 'cover' }}
                 />
             </div>
 
