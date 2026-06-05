@@ -28,6 +28,33 @@ const resolveTripType = (query = '') => {
     return '';
 };
 
+const resolveStatus = (query = '') => {
+    const q = query.trim().toLowerCase().replace(/[\s_]+/g, '');
+
+    if (q === 'booked') return 'BOOKED';
+    if (q === 'readytodispatch' || q === 'ready') return 'READY_TO_DISPATCH';
+    if (q === 'pickedup' || q === 'pickup') return 'PICKED_UP';
+    if (q === 'intransit' || q === 'transit') return 'IN_TRANSIT';
+    if (q === 'athub' || q === 'hub') return 'AT_HUB';
+    if (q === 'outfordelivery' || q === 'outfordel') return 'OUT_FOR_DELIVERY';
+    if (q === 'delivered') return 'DELIVERED';
+    if (q === 'delayed') return 'DELAYED';
+
+    return '';
+};
+
+const statusFilterOptions = [
+    { value: '', label: 'All Statuses' },
+    { value: 'BOOKED', label: 'Booked' },
+    { value: 'READY_TO_DISPATCH', label: 'Ready To Dispatch' },
+    // { value: 'PICKED_UP', label: 'Picked Up' },
+    { value: 'IN_TRANSIT', label: 'In Transit' },
+    // { value: 'AT_HUB', label: 'At Hub' },
+    // { value: 'OUT_FOR_DELIVERY', label: 'Out For Delivery' },
+    { value: 'DELIVERED', label: 'Delivered' },
+    { value: 'DELAYED', label: 'Delayed' },
+];
+
 const isBookedStatus = (status = '') => {
     return String(status).replace(/\s+/g, '_').toUpperCase() === 'BOOKED';
 };
@@ -49,6 +76,7 @@ const Shipments = () => {
     const [isDeleting, setIsDeleting] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
+    const [selectedStatusFilter, setSelectedStatusFilter] = useState('');
 
     // Debounce search: wait 500ms after user stops typing
     useEffect(() => {
@@ -64,11 +92,15 @@ const Shipments = () => {
             setIsLoading(true);
             try {
                 const tripType = resolveTripType(debouncedSearch);
+                const typedStatus = resolveStatus(debouncedSearch);
+                const status = selectedStatusFilter || typedStatus;
+                const searchText = tripType ? '' : (selectedStatusFilter ? debouncedSearch : (typedStatus ? '' : debouncedSearch));
                 const response = await getShipmentList({
                     page,
                     pageSize,
-                    search: tripType ? '' : debouncedSearch,
+                    search: searchText,
                     tripType,
+                    status,
                 });
                 const data = response.data?.data;
                 setShipments(data?.items || []);
@@ -81,7 +113,7 @@ const Shipments = () => {
             }
         };
         fetchShipments();
-    }, [page, pageSize, debouncedSearch]);
+    }, [page, pageSize, debouncedSearch, selectedStatusFilter]);
 
     const handleAddClick = () => {
         navigate('/shipments/add');
@@ -91,6 +123,11 @@ const Shipments = () => {
         const newSize = Number(event.target.value);
         setPageSize(newSize);
         setPage(1);  // always reset to page 1 when page size changes
+    };
+
+    const handleStatusFilterChange = (event) => {
+        setSelectedStatusFilter(event.target.value);
+        setPage(1);
     };
 
     const handleDeleteClick = (shipment) => {
@@ -188,7 +225,7 @@ const Shipments = () => {
             </div>
 
             {/* Search Bar Row */}
-            <div className="d-flex justify-content-start mb-3">
+            <div className="d-flex flex-wrap align-items-center gap-3 mb-3">
                 <div className="shp-search-wrap shp-search-lg">
                     <span className="shp-search-icon"><FaSearch size={14} /></span>
                     <input
@@ -199,9 +236,42 @@ const Shipments = () => {
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
                     {searchQuery && (
-                        <button className="shp-search-clear" onClick={() => setSearchQuery('')}>
+                        <button
+                            type="button"
+                            className="shp-search-clear"
+                            onClick={() => setSearchQuery('')}
+                            aria-label="Clear search"
+                        >
                             <FaTimes size={12} />
                         </button>
+                    )}
+                </div>
+
+                <div className="d-flex align-items-center gap-2">
+                    <Form.Select
+                        value={selectedStatusFilter}
+                        onChange={handleStatusFilterChange}
+                        className="shadow-sm rounded-3"
+                        style={{ minWidth: '210px', height: '48px' }}
+                        aria-label="Filter shipments by status"
+                    >
+                        {statusFilterOptions.map((option) => (
+                            <option key={option.value || 'all'} value={option.value}>
+                                {option.label}
+                            </option>
+                        ))}
+                    </Form.Select>
+
+                    {selectedStatusFilter && (
+                        <Button
+                            type="button"
+                            variant="light"
+                            className="border shadow-sm rounded-3"
+                            style={{ height: '48px', whiteSpace: 'nowrap' }}
+                            onClick={() => setSelectedStatusFilter('')}
+                        >
+                            Clear Filter
+                        </Button>
                     )}
                 </div>
             </div>
